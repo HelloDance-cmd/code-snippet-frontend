@@ -5,7 +5,6 @@ import UserView from '../view/UserView.vue';
 import LoginView from '../view/LoginView.vue';
 import RegisterView from '../view/RegisterView.vue';
 import DashboardView from '../view/DashboardView.vue';
-import TestView from '../view/TestView.vue';
 import { fetchTokenIsExpired } from '../utils/userReqeust';
 import ForgotPasswordView from '../view/ForgotPasswordView.vue';
 
@@ -25,7 +24,6 @@ const routes: Readonly<RouteRecordRaw[]> = [
     ]
   },
   { path: '/forget-password', component: ForgotPasswordView },
-  { path: '/test', component: TestView }
 ];
 
 const router = createRouter({

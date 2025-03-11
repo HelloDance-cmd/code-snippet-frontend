@@ -25,7 +25,6 @@ import { Form, Input, Button, message } from 'ant-design-vue';
 import { fetchUserLogin } from '../utils/userReqeust';
 import { useRouter } from 'vue-router';
 
-
 const router = useRouter();
 
 const formData = reactive({
