@@ -13,7 +13,7 @@
         登录
       </Button>
     </Form.Item>
-    <RouterLink class="register" to="/regist">
+    <RouterLink class="register" to="/register">
       还不是CODE SNIPPPET的用户，点此开始注册
     </RouterLink>
   </Form>
@@ -40,7 +40,7 @@ const handleSubmit = async () => {
     
     localStorage.setItem("token", resp.data.data);
 
-    router.push("/dashborad");
+    router.push("/dashboard");
   }
 };
 

@@ -1,22 +1,6 @@
 
-// const BASE_URL = 'http://127.0.0.1:8080'
-const BASE_URL = '/api'
 
-import axios, { type AxiosResponse } from "axios"
-
-const request = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*"
-  },
-})
-
-request.interceptors.request.use(config => {
-  config.headers.set("token", localStorage.getItem("token"));
-  return config;
-});
-
+import request, { type AxiosResponse } from "./axiosRequest"
 
 export function fetchUserLogin(username: string, password: string): Promise<AxiosResponse> {
   return request.post('/user/login', {
@@ -34,7 +18,16 @@ export function fetchUserRegister(username: string, password: string, email: str
 }
 
 export function fetchTokenIsExpired() {
-  return request.get("/user/is-expired", {
+  if (localStorage.getItem('token') == null) {
+    return Promise.resolve({
+      data: {
+        data: 'Token 是空的'
+      },
+      status: 401
+    })
+  }
+
+  return request.get("/user/isExpired", {
     params: {
       token: localStorage.getItem("token") || '' 
     }

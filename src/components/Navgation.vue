@@ -16,7 +16,7 @@
     <section class="user-control">
       <Input placeholder="查找代码片段" style="width: 300px;"/>
       <Button type="primary">
-        <RouterLink to="/regist">注册</RouterLink>
+        <RouterLink to="/register">注册</RouterLink>
       </Button>
       <Button>
         <RouterLink to="/login">登录</RouterLink>
