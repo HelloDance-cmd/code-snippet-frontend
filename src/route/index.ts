@@ -37,25 +37,25 @@ const router = createRouter({
   routes,
 });
 
-/**
- * 设置前置路由守卫
- */
-router.beforeEach(async (to, _, next) => {
-  const toPath = to.path;
+// /**
+//  * 设置前置路由守卫
+//  */
+// router.beforeEach(async (to, _, next) => {
+//   const toPath = to.path;
 
-  const whiteList = ['/login', '/register', '/', '/forget-password']
-  if(whiteList.includes(toPath)) {
-    if (localStorage.getItem("token")) localStorage.removeItem("token");
-    next();
-    return;
-  }
+//   const whiteList = ['/login', '/register', '/', '/forget-password']
+//   if(whiteList.includes(toPath)) {
+//     if (localStorage.getItem("token")) localStorage.removeItem("token");
+//     next();
+//     return;
+//   }
   
-  const isExpired = await fetchTokenIsExpired();
+//   const isExpired = await fetchTokenIsExpired();
   
-  if (isExpired.data.data || isExpired.status == 401)
-    next('/login');
-  else
-    next();
-})
+//   if (isExpired.data.data || isExpired.status == 401)
+//     next('/login');
+//   else
+//     next();
+// })
 
 export default router;

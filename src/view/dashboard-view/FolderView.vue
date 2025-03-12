@@ -31,7 +31,11 @@
             <Input.Search placeholder="搜索笔记" style="margin-bottom: 16px;" />
           </div>
           <div class="markdown-editor">
-            <Button type="primary" @click="submitMarkdown"> 提交 </Button>
+            <section style="display: flex; gap: 10px; align-items: center;">
+              <Button type="primary" @click="submitMarkdown" class="btn-submit"> 提交 </Button>
+              <span>选择标签</span>
+              <Select style="width: 100px;" label-in-value v-model:value="selectComponentValue" :options="[{value: 'Java', label: 'Java'}]"/>
+            </section>
             <MdEditor v-model="text" :toolbars="['bold', 'title', '=', 'code']" class="editor" />
           </div>
         </Layout.Content>
@@ -41,22 +45,22 @@
 </template>
 
 <script setup lang="ts">
-import { Layout, Menu, Input, ItemType, Button, message } from 'ant-design-vue';
+import { Layout, Menu, Input, ItemType, Button, message, Select } from 'ant-design-vue';
 import { FileAddOutlined, FolderAddOutlined } from '@ant-design/icons-vue';
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { fetchFolderStructureInDashBoard, fetchSnippetContentChange, SnippetsVo } from '../../utils/useDashboardRequest';
 import { MenuClickEventHandler } from 'ant-design-vue/es/menu/src/interface';
 import { NoticeType } from 'ant-design-vue/es/message';
-import { log } from 'console';
+
 const text = ref('Hello Editor!');
 const keyMap = new Map<string, string>();
 const currentChooseId = ref<string>();
 let folderItems = ref<ItemType[]>([]);
 let folderSturcture = ref<SnippetsVo[]>();
+const selectComponentValue = reactive<string[]>([]);
 
-watch(currentChooseId, () => {});
 
 function getItem( label: string, key: string, icon?: any, children?: ItemType[], type?: 'group'): ItemType {
   return {
@@ -157,13 +161,14 @@ onMounted(async () => {
 .markdown-editor {
   /* 为Markdown编辑器留出足够的空间 */
   height: 400px;
-  border: 1px solid #d9d9d9;
-  padding: 8px;
+  padding: 0 8px 8px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-
+  .btn-submit {
+    align-self: self-start;
+  }
   .editor {
     ::v-deep .md-editor-toolbar {
       height: 3rem;
@@ -176,14 +181,7 @@ onMounted(async () => {
   }
 }
 
-::v-deep li[data-menu-id] {
-  background-color: black;
-  color: white;
-
-  color: v-bind(currentChooseId);
-}
-
-.layout-content {
-  min-height: unset;
-}
+// .layout-content {
+//   min-height: unset;
+// }
 </style>
