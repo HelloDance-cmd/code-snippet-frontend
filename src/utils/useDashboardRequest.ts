@@ -10,15 +10,16 @@ export interface SnippetsVo {
   children: SnippetsVo[]; 
 }
 
-interface Response {
-  code: number;
-  data: SnippetsVo[];
+type Response<T> = Promise<AxiosResponse<{status: number, data: T}>>
+
+
+export function fetchFolderStructureInDashBoard(): Response<SnippetsVo[]> {
+  return request.get('/dashboard/get-folder-structure')
 }
 
-export function fetchFolderStructureInDashBoard(): Promise<AxiosResponse<Response>> {
-  return request.get('/dashboard/get-folder-structure', {
-    headers: {
-      token: localStorage.getItem('token') || ''
-    }
+
+export function fetchSnippetContentChange(id: string, content: string): Response<boolean> {
+  return request.post('/dashboard/snippetContentUpdate', {
+    id, content
   })
 }
