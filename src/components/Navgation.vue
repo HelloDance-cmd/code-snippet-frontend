@@ -13,8 +13,8 @@
       </Button>
     </section>
 
-    <section class="user-control">
-      <Input placeholder="查找代码片段" style="width: 300px;"/>
+    <section class="user-control" v-if="!signInStatus">
+      <!-- <Input placeholder="查找代码片段" style="width: 300px;"/> -->
       <Button type="primary">
         <RouterLink to="/register">注册</RouterLink>
       </Button>
@@ -22,11 +22,35 @@
         <RouterLink to="/login">登录</RouterLink>
       </Button>
     </section>
+    <section class="user-control" v-else style="">
+      <span>欢迎你，</span>
+      <span>{{ username }}</span>
+    </section>
   </nav>
 </template>
 
 <script lang="ts" setup>
 import { Button, Input } from 'ant-design-vue';
+import { fetchTokenIsExpired, fetchWhoAmI } from '../utils/userReqeust';
+import { ref } from 'vue';
+
+const signInStatus = ref<boolean>();
+const username = ref<string>();
+const UNAUTHORIZED_CODE = 401;
+
+setInterval(() => {
+  fetchTokenIsExpired()
+    .then(response => {
+      const statusCode = response.data.code;
+      signInStatus.value = statusCode !== UNAUTHORIZED_CODE;
+    });
+
+  fetchWhoAmI()
+    .then((response) => {
+      const {username: uName} = response.data.data
+      username.value = uName;
+    })
+}, 10_000)
 
 
 </script>
@@ -68,6 +92,7 @@ import { Button, Input } from 'ant-design-vue';
       flex-direction: row;
       justify-self: end;
       gap: $gap;
+      justify-content: flex-end;
     }
   }
 </style>

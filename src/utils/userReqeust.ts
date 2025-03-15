@@ -33,3 +33,12 @@ export function fetchTokenIsExpired() {
     }
   });
 }
+
+
+export interface WhoAmIResponse {
+  username: string,
+  email: string
+}
+export function fetchWhoAmI(): Promise<AxiosResponse<{ code: number, data: WhoAmIResponse }>> {
+  return request.post("/user/whoami");
+}

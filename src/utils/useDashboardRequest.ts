@@ -1,5 +1,5 @@
 
-import request, { AxiosResponse } from "./axiosRequest"
+import request, { type Response } from "./axiosRequest"
 
 export interface SnippetsVo {
   title: string;
@@ -15,7 +15,7 @@ export interface SimpleSnippet {
   title: string,
 }
 
-type Response<T> = Promise<AxiosResponse<{status: number, data: T}>>
+
 
 
 export function fetchFolderStructureInDashBoard(): Response<SnippetsVo[]> {

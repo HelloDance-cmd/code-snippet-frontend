@@ -17,6 +17,7 @@ request.interceptors.request.use(config => {
   return config;
 });
 
+export type Response<T> = Promise<AxiosResponse<{status: number, data: T}>>
 
 export default request
 

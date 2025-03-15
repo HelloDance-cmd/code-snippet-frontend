@@ -9,6 +9,7 @@ import { fetchTokenIsExpired } from '../utils/userReqeust';
 import ForgotPasswordView from '../view/ForgotPasswordView.vue';
 import FolderView from '../view/FolderView.vue';
 import { h } from 'vue';
+import ControlPanelView from '../view/ControlPanelView.vue';
 
 const routes: Readonly<RouteRecordRaw[]> = [
   { path: '/', component: HomeView },
@@ -19,7 +20,7 @@ const routes: Readonly<RouteRecordRaw[]> = [
     path: '/dashboard',
     component: DashboardView,
     children: [
-      { path: 'dashboard', component: h('div', null, 'dashboard') },
+      { path: 'panel', component: ControlPanelView },
       { path: 'folder', component: FolderView },
       { path: 'setting', component: h('div', null, 'setting') },
     ]

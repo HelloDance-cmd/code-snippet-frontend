@@ -11,7 +11,7 @@
             </section>
           </MenuItem>
           <MenuItem key="1" title="仪表板">
-            <RouterLink to="/dashboard/dashboard">
+            <RouterLink to="/dashboard/panel">
               <DashboardOutlined v-if="collapsed"/>
               <section v-else>
                 <DashboardOutlined />  
