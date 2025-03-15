@@ -1,18 +1,10 @@
 <template>
   <Layout>
-    <!-- <Layout.Sider width="150" theme="light" height="100%">
-      <Menu mode="inline" default-selected-keys="['1']">
-        <Menu.Item key="1">所有代码片段</Menu.Item>
-        <Menu.Item key="3">文件夹</Menu.Item>
-        <Menu.Item key="5">最近删除</Menu.Item>
-      </Menu>
-    </Layout.Sider> -->
     <Layout.Content style="padding: 0 10px;">
       <Layout style="gap: 10px;">
-
-        <Layout.Sider theme="light" style="padding: 5px;">
+        <Layout.Sider theme="light" style="padding: 5px;" @click="currentSelectedId = ''">
           <section style="display: flex; justify-content: right;">
-            <Button type="ghost" size="small" @click="addFileHandler">
+            <Button type="ghost" size="small" @click="addSnippetHandler">
               <template #icon>
                 <FileAddOutlined />
               </template>
@@ -21,18 +13,15 @@
           <Menu mode="inline" default-selected-keys="['1']" :items="snippetItems"
             @click="(codeSnippetSelection as MenuClickEventHandler)" />
         </Layout.Sider>
-
-
         <Layout.Content>
           <div class="note-list">
             <Input.Search placeholder="搜索笔记" style="margin-bottom: 16px;" />
           </div>
           <div class="markdown-editor">
             <section style="display: flex; gap: 10px; align-items: center;">
-              <Button type="primary" @click="submitMarkdown" class="btn-submit">提交 </Button>
+              <Button type="primary" @click="submitMarkdown" :disabled="markdownText !== 'Nothing'" class="btn-submit">提交</Button>
               <span>选择标签</span>
-              <Select style="width: 100px;" label-in-value v-model:value="selectedCategory"
-                :options="categories" />
+              <Select style="width: 100px;" label-in-value v-model:value="category" :options="categories" />
             </section>
             <MdEditor v-model="markdownText" :toolbars="['bold', 'title', '=', 'code']" class="editor" />
           </div>
@@ -50,24 +39,25 @@ import { ExclamationCircleOutlined, FileAddOutlined } from '@ant-design/icons-vu
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { h, onMounted, reactive, ref } from 'vue';
-import { fetchCategoriesOfSnippet, fetchCreateSnippet, fetchFolderStructureInDashBoard, fetchSnippetContentChange, type SnippetsVo } from '../../utils/useDashboardRequest';
+import { fetchCategoriesOfSnippet, fetchCreateSnippet, fetchFolderStructureInDashBoard, fetchSnippetContentChange, type SnippetsVo } from '../utils/useDashboardRequest';
 import { MenuClickEventHandler } from 'ant-design-vue/es/menu/src/interface';
 import { NoticeType } from 'ant-design-vue/es/message';
-import { DefaultOptionType, SelectValue } from 'ant-design-vue/es/select';
+import { DefaultOptionType } from 'ant-design-vue/es/select';
 
-const markdownText = ref('Hello Editor!');
-const keyMap = new Map<string, string>();
-const currentChooseId = ref<string>();
-const selectedCategory = ref<string>();
-let snippetItems = ref<ItemType[]>([]);
-let originalSnippetStructure = ref<SnippetsVo[]>();
-let snippetName = ref<string>('news')
+const markdownText = ref('Nothing');
+const keyToContentMap = new Map<string, string>();
+const currentSelectedId = ref<string>('Nothing');
 const categories = ref<DefaultOptionType[]>()
-
-
 const [modal, ContextHolder] = Modal.useModal();
+const category = ref<string>();
+let snippetItems = ref<ItemType[]>([]);
+let snippets = ref<SnippetsVo[]>();
+let snippetName = ref<string>('news');
 
-function addFileHandler() {
+/**
+ * 添加Snippet运行的处理函数
+ */
+function addSnippetHandler() {
   let snippet: SnippetsVo = {
     title: '',
     content: '',
@@ -89,16 +79,25 @@ function addFileHandler() {
     }),
     onOk: async () => {
       snippet.title = snippet.snippetID = snippet.content = snippetName.value
-      keyMap.set(snippet.snippetID, snippet.content);
-      if (currentChooseId.value == undefined) {
+      keyToContentMap.set(snippet.snippetID, snippet.content);
+      if (currentSelectedId.value == undefined) {
         await pubshItemBelowIt(snippet, '');
       } else {
-        await pubshItemBelowIt(snippet, currentChooseId.value as string)
+        await pubshItemBelowIt(snippet, currentSelectedId.value as string)
       }
       await refreshData();
     }
   });
 }
+/**
+ * 生成Menu组件所需要的项
+ * @see https://www.antdv.com/components/menu-cn/#Menu-
+ * @param label 
+ * @param key 
+ * @param icon 
+ * @param children 
+ * @param type 
+ */
 function getItem(label: string, key: string, icon?: any, children?: ItemType[], type?: 'group'): ItemType {
   return {
     key,
@@ -107,7 +106,10 @@ function getItem(label: string, key: string, icon?: any, children?: ItemType[], 
     label,
     type,
   } as ItemType;
-}
+}/**
+ * 将视图对象转换为可以Menu组件可以理解的对象
+ * @param dataset 后端传递过来的snippet视图对象
+ */
 function getFolderItems(dataset: SnippetsVo[]): ItemType[] {
   function dfs() {
     let ans: ItemType[] = []
@@ -115,7 +117,7 @@ function getFolderItems(dataset: SnippetsVo[]): ItemType[] {
       if (dataset[i].children.length != 0) {
         ans.push(getItem(dataset[i].title, dataset[i].snippetID, null, getFolderItems(dataset[i].children)))
       } else {
-        keyMap.set(dataset[i].snippetID, dataset[i].content);
+        keyToContentMap.set(dataset[i].snippetID, dataset[i].content);
         ans.push(getItem(dataset[i].title, dataset[i].snippetID))
       }
     }
@@ -125,62 +127,68 @@ function getFolderItems(dataset: SnippetsVo[]): ItemType[] {
   return dfs();
 }
 
+/**
+ * 通过ID查找对应树中的项
+ * @param id 希望查找的ID
+ * @param snippetItems 查找的树结构
+ */
+function findSnippetItemById(id: string, snippetItems: SnippetsVo[] = snippets.value as SnippetsVo[]): SnippetsVo | null {
+  let ans: SnippetsVo | null = null;
+  for (let snippet of snippetItems as SnippetsVo[]) {
+    if (snippet.snippetID == id)
+      return snippet;
+    else if (snippet.children.length != 0) {
+      ans = findSnippetItemById(id, snippet.children);
+    }
+  }
+
+  return ans;
+}
+/**
+ * 用户选择snippet的时候运行的处理函数
+ */
 async function codeSnippetSelection({ item, key, keyPath }) {
   await refreshData();
-  currentChooseId.value = key;
-  markdownText.value = keyMap.get(key) as string;
-  selectedCategory.value = getCategory()
-
-  function getCategory(snippets = originalSnippetStructure.value as SnippetsVo[]) {
-    let ans = '';
-    for (let snippet of snippets) {
-      if (snippet.snippetID == key) {
-        return snippet.category;
-      } else if (snippet.children.length != 0) {
-        ans = getCategory(snippet.children)
-      }
-    }
-
-    return ans;
-  }
+  currentSelectedId.value = key;
+  markdownText.value = keyToContentMap.get(key) as string;
+  const { category: gottenCategory } = findSnippetItemById(key) as SnippetsVo;
+  category.value = gottenCategory;
 }
-
+/**
+ * 
+ * @param item 点击新建生成的对象
+ * @param id 作为哪个结点的子元素
+ */
 async function pubshItemBelowIt(item: SnippetsVo, id: string) {
-  async function dfs(snippets = originalSnippetStructure.value) {
-    for (let snippet of snippets as SnippetsVo[]) {
-      if (snippet.snippetID == id) {
-        await fetchCreateSnippet({
-          parentId: id,
-          title: item.title
-        })
+  const snippet = findSnippetItemById(id)
+  snippet?.children.push(item);
 
-        snippet.children.push(item);
-      } else if (snippet.children.length != 0) {
-        dfs(snippet.children)
-      }
-    }
-  }
-
-  if (id == '') {
+  if (id === null) {
     await fetchCreateSnippet({
       parentId: null,
       title: item.title
     })
-    originalSnippetStructure.value?.push(item);
-    snippetItems.value = getFolderItems(originalSnippetStructure.value as SnippetsVo[]);
-  } else {
-    await dfs()
+    snippets.value?.push(item);
+    return;
   }
-  snippetItems.value = getFolderItems(originalSnippetStructure.value as SnippetsVo[])
-}
 
+  if (snippet !== null) {
+    snippet.children.push(item);
+    await fetchCreateSnippet({
+        parentId: id,
+        title: item.title
+    })
+  }
+
+  snippetItems.value = getFolderItems(snippets.value as SnippetsVo[]);
+}
 /**
  * 提交编辑好的markdown文件
  */
 async function submitMarkdown() {
-  const id = currentChooseId.value as string; // 当前选择的文件ID
+  const id = currentSelectedId.value as string; // 当前选择的文件ID
   function isExist(id: string): boolean {
-    let arr = originalSnippetStructure.value as SnippetsVo[];
+    let arr = snippets.value as SnippetsVo[];
     let mockStack: SnippetsVo[][] = [arr]
 
     while (mockStack.length != 0) {
@@ -201,7 +209,7 @@ async function submitMarkdown() {
   let alertType: NoticeType = 'error';
 
   if (isExist(id)) {
-    let response = await fetchSnippetContentChange(id as string, markdownText.value, selectedCategory.value as string);
+    let response = await fetchSnippetContentChange(id as string, markdownText.value, category.value as string);
     alertMessage = response.data.data ? '更新成功' : '更新失败';
     alertType = response.data.data ? 'info' : 'error';
   }
@@ -211,21 +219,21 @@ async function submitMarkdown() {
     type: alertType
   })
 }
-
+/**
+ * 出现结构变化需要从后台重新生成ID
+ * 需要重新获取ID
+ */
 async function refreshData() {
   const response = await fetchFolderStructureInDashBoard()
-  const { data } = response.data;
-  
-  originalSnippetStructure.value = data;
-  snippetItems.value = getFolderItems(data);
+  const { data: { data: categ } } = await fetchCategoriesOfSnippet();
 
-  const { data: { data: categ}  } = await fetchCategoriesOfSnippet();
+  const { data: snippetsFromBackend } = response.data;
+
+  snippets.value = snippetsFromBackend;
+  snippetItems.value = getFolderItems(snippetsFromBackend);
+
 
   categories.value = categ.map(c => ({ label: c, value: c }));
-
-
-  await Promise.resolve((resolve) => setTimeout(resolve, 2000))
-
 }
 
 onMounted(() => {
