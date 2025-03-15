@@ -7,8 +7,8 @@ import RegisterView from '../view/RegisterView.vue';
 import DashboardView from '../view/DashboardView.vue';
 import { fetchTokenIsExpired } from '../utils/userReqeust';
 import ForgotPasswordView from '../view/ForgotPasswordView.vue';
+import FolderView from '../view/FolderView.vue';
 import { h } from 'vue';
-import FolderView from '../view/dashboard-view/FolderView.vue';
 
 const routes: Readonly<RouteRecordRaw[]> = [
   { path: '/', component: HomeView },
