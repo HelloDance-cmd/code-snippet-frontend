@@ -8,7 +8,7 @@
 <script setup>
 import ThemeConfig from "../public/Ant Design Vue Theme.json"
 
-import { Button, ConfigProvider } from "ant-design-vue";
+import { ConfigProvider } from "ant-design-vue";
 import Navgation from "./components/Navgation.vue";
 </script>
 

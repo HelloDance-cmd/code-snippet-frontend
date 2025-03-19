@@ -1,6 +1,6 @@
 
 
-import request, { type AxiosResponse } from "./axiosRequest"
+import request, { type AxiosResponse, type Response } from "./axiosRequest"
 
 export function fetchUserLogin(username: string, password: string): Promise<AxiosResponse> {
   return request.post('/user/login', {
@@ -41,4 +41,10 @@ export interface WhoAmIResponse {
 }
 export function fetchWhoAmI(): Promise<AxiosResponse<{ code: number, data: WhoAmIResponse }>> {
   return request.post("/user/whoami");
+}
+
+type Possible = {"登录": Date} | {"登出": Date}
+export type LoginRecoredType = Possible[]
+export function fetchLoginRecord(): Response<LoginRecoredType> {
+  return request.post("/user/loginLogs")
 }

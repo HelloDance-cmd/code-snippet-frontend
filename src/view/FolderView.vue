@@ -9,6 +9,11 @@
                 <FileAddOutlined />
               </template>
             </Button>
+            <Button type="ghost" size="small" @click="removeSnippetHandler">
+              <template #icon>
+                <DeleteOutlined />
+              </template>
+            </Button>
           </section>
           <Menu mode="inline" default-selected-keys="['1']" :items="snippetItems"
             @click="(codeSnippetSelection as MenuClickEventHandler)" />
@@ -36,7 +41,7 @@
 
 <script setup lang="ts">
 import { Layout, Menu, Input, ItemType, Button, message, Select, Modal, Radio, RadioGroup, RadioButton } from 'ant-design-vue';
-import { ExclamationCircleOutlined, FileAddOutlined } from '@ant-design/icons-vue';
+import { DeleteOutlined, ExclamationCircleOutlined, FileAddOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { h, onMounted, reactive, ref } from 'vue';
@@ -44,6 +49,7 @@ import { fetchCategoriesOfSnippet, fetchCreateSnippet, fetchFolderStructureInDas
 import { MenuClickEventHandler } from 'ant-design-vue/es/menu/src/interface';
 import { NoticeType } from 'ant-design-vue/es/message';
 import { DefaultOptionType } from 'ant-design-vue/es/select';
+import { fetchSnippetDelete } from '../utils/snippetRequest';
 
 
 const EMTPY_VALUE = 'Nothing';
@@ -56,6 +62,33 @@ const category = ref<string>();
 let snippetItems = ref<ItemType[]>([]);
 let snippets = ref<SnippetsVo[]>([]);
 let snippetName = ref<string>('news');
+
+
+function removeSnippetHandler() {
+  if (currentSelectedId.value === EMTPY_VALUE) {
+    return;
+  }
+
+  modal.confirm({
+    title: '确定要删除吗？',
+    icon: h(InfoCircleOutlined, {
+      style: {
+        color: 'red'
+      }
+    }),
+
+    async onOk() {
+      try {
+        await fetchSnippetDelete(currentSelectedId.value);
+        message.success("删除成功");
+        await refreshData();
+      } catch (e) {
+        message.error("删除失败")
+      }
+    }
+  })
+}
+
 
 /**
  * 添加Snippet运行的处理函数
@@ -84,7 +117,7 @@ function addSnippetHandler() {
         }
       }),
       h('div', null, [
-        h('div', {style: 'padding: 10px 0 10px 0;'}, [h('strong', null, '选择存储位置')]),
+        h('div', { style: 'padding: 10px 0 10px 0;' }, [h('strong', null, '选择存储位置')]),
         h(RadioGroup, {
           value: snippetStoredIn,
           "onUpdate:value": (value: STORE_LOCATION) => {
@@ -308,5 +341,4 @@ onMounted(() => {
     }
   }
 }
-
 </style>

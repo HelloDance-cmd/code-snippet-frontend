@@ -19,18 +19,26 @@
     <section>
       <Space class="card" :size="20">
         <Card title="你的文件夹">
-          <List :data-source="directories">
-            <template #renderItem="{ item }">
-              <ListItem>{{ item }}</ListItem>
-            </template>
-          </List>
+          <ul>
+            <li v-for="(item, index) in directories" :key="index" :data-id="item.id" v-on:dblclick="renameDirectory">
+              {{ item.name }}
+            </li>
+          </ul>
         </Card>
-        <Card title="登录记录">B</Card>
+        <Card title="登录记录">
+            <h2>{{ userInfo?.username }}</h2>
+            <List> 
+              <ListItem v-for="record, index in loginRecords" :key="index">
+                {{ convertMessage(record) }}
+              </ListItem>
+            </List>
+        </Card>
       </Space>
     </section>
     <section>
       <Space class="card">
-        <Card title="你的Tags占比">C</Card>
+        <Card title="你的Tags占比">
+        </Card>
       </Space>
     </section>
   </section>
@@ -40,11 +48,24 @@
 import { UserOutlined } from '@ant-design/icons-vue';
 import { Avatar, Card, List, ListItem, Space } from 'ant-design-vue';
 import { onMounted, ref } from "vue";
-import { type WhoAmIResponse, fetchWhoAmI } from '../utils/userReqeust';
-import { fetchSnippetWhichHasChildren } from '../utils/snippetRequest';
+import { type LoginRecoredType, type WhoAmIResponse, fetchLoginRecord, fetchWhoAmI } from '../utils/userReqeust';
+import { fetchSnippetDirectories, TDirectory } from '../utils/snippetRequest';
+
 
 const userInfo = ref<WhoAmIResponse>();
-const directories = ref<string[]>();
+const directories = ref<TDirectory[]>();
+
+const loginRecords = ref<LoginRecoredType>();
+const RECORDS_LEN = 5; // 最多显示`LOGIN_RECOREDS_LEN`条记录
+
+function convertMessage(record: any): string {
+  const convertDate = (dateStr: string) => new Date(dateStr).toLocaleString()
+  return record["登录"] == undefined ? `登出 ${convertDate(record["登出"])}`:`登录  ${convertDate(record["登录"])}`  
+}
+
+function renameDirectory(event: MouseEvent) {
+  
+}
 
 onMounted(() => {
   fetchWhoAmI()
@@ -52,12 +73,20 @@ onMounted(() => {
       const { data: { data } } = response;
       userInfo.value = data;
     })
-
-  fetchSnippetWhichHasChildren()
+  
+  fetchSnippetDirectories()
     .then(response => {
       const { data: { data } } = response;
       directories.value = data.slice(0, 15);
     })
+  
+  
+    fetchLoginRecord()
+      .then(response => {
+        const { data } = response.data;
+        loginRecords.value = data.slice(0, RECORDS_LEN);
+      })
+    
 })
 
 </script>
