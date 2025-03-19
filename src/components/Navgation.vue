@@ -12,9 +12,8 @@
         </RouterLink>
       </Button>
     </section>
-
-    <section class="user-control" v-if="!signInStatus">
-      <!-- <Input placeholder="查找代码片段" style="width: 300px;"/> -->
+    
+    <section class="user-control" v-if="signInStatus">
       <Button type="primary">
         <RouterLink to="/register">注册</RouterLink>
       </Button>
@@ -22,7 +21,7 @@
         <RouterLink to="/login">登录</RouterLink>
       </Button>
     </section>
-    <section class="user-control" v-else style="">
+    <section class="user-control" v-else>
       <span>欢迎你，</span>
       <span>{{ username }}</span>
     </section>
@@ -30,19 +29,20 @@
 </template>
 
 <script lang="ts" setup>
-import { Button, Input } from 'ant-design-vue';
+import { Button } from 'ant-design-vue';
 import { fetchTokenIsExpired, fetchWhoAmI } from '../utils/userReqeust';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-const signInStatus = ref<boolean>();
+const signInStatus = ref<boolean>(false);
 const username = ref<string>();
 const UNAUTHORIZED_CODE = 401;
 
-setInterval(() => {
+onMounted(() => {
   fetchTokenIsExpired()
     .then(response => {
+      console.log(response)
       const statusCode = response.data.code;
-      signInStatus.value = statusCode !== UNAUTHORIZED_CODE;
+      signInStatus.value = statusCode != UNAUTHORIZED_CODE;
     });
 
   fetchWhoAmI()
@@ -50,7 +50,7 @@ setInterval(() => {
       const {username: uName} = response.data.data
       username.value = uName;
     })
-}, 10_000)
+})
 
 
 </script>

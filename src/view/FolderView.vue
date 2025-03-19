@@ -2,14 +2,10 @@
   <Layout>
     <Layout.Content style="padding: 0 10px;">
       <Layout style="gap: 10px;">
-        <Layout.Sider theme="light" style="padding: 5px;">
+        <Layout.Sider theme="light" style="padding: 10px;">
           <section style="display: flex; justify-content: right;">
-            <Button type="ghost" size="small" @click="addSnippetHandler">
-              <template #icon>
-                <FileAddOutlined />
-              </template>
-            </Button>
-            <Button type="ghost" size="small" @click="removeSnippetHandler">
+            <Button type="primary" size="middle" @click="addSnippetHandler">新建文件</Button>
+            <Button type="ghost" size="middle" @click="removeSnippetHandler">
               <template #icon>
                 <DeleteOutlined />
               </template>
@@ -20,7 +16,7 @@
         </Layout.Sider>
         <Layout.Content>
           <div class="note-list">
-            <Input.Search placeholder="搜索笔记" style="margin-bottom: 16px;" />
+            <!-- <Input.Search placeholder="搜索笔记" style="margin-bottom: 16px;" /> -->
           </div>
           <div class="markdown-editor">
             <section style="display: flex; gap: 10px; align-items: center;">
@@ -325,6 +321,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: 100%;
 
   .btn-submit {
     align-self: self-start;

@@ -17,26 +17,26 @@
 
   <section class="panel-card">
     <section>
-      <Space class="card" :size="20">
+      <Space :size="20">
         <Card title="你的文件夹">
-          <ul>
-            <li v-for="(item, index) in directories" :key="index" :data-id="item.id" v-on:dblclick="renameDirectory">
+          <ul class="directories">
+            <li v-for="(item, index) in directories" :key="index" :data-id="item.id" v-on:dblclick="renameDirectory(item)">
               {{ item.name }}
             </li>
           </ul>
         </Card>
         <Card title="登录记录">
-            <h2>{{ userInfo?.username }}</h2>
-            <List> 
-              <ListItem v-for="record, index in loginRecords" :key="index">
-                {{ convertMessage(record) }}
-              </ListItem>
-            </List>
+          <h2>{{ userInfo?.username }}</h2>
+          <List>
+            <ListItem v-for="record, index in loginRecords" :key="index">
+              {{ convertMessage(record) }}
+            </ListItem>
+          </List>
         </Card>
       </Space>
     </section>
     <section>
-      <Space class="card">
+      <Space>
         <Card title="你的Tags占比">
         </Card>
       </Space>
@@ -60,10 +60,10 @@ const RECORDS_LEN = 5; // 最多显示`LOGIN_RECOREDS_LEN`条记录
 
 function convertMessage(record: any): string {
   const convertDate = (dateStr: string) => new Date(dateStr).toLocaleString()
-  return record["登录"] == undefined ? `登出 ${convertDate(record["登出"])}`:`登录  ${convertDate(record["登录"])}`  
+  return record["登录"] == undefined ? `登出 ${convertDate(record["登出"])}` : `登录  ${convertDate(record["登录"])}`
 }
 
-function renameDirectory(event: MouseEvent) {
+function renameDirectory(item: TDirectory) {
   
 }
 
@@ -73,25 +73,25 @@ onMounted(() => {
       const { data: { data } } = response;
       userInfo.value = data;
     })
-  
+
   fetchSnippetDirectories()
     .then(response => {
       const { data: { data } } = response;
       directories.value = data.slice(0, 15);
     })
-  
-  
-    fetchLoginRecord()
-      .then(response => {
-        const { data } = response.data;
-        loginRecords.value = data.slice(0, RECORDS_LEN);
-      })
-    
+
+
+  fetchLoginRecord()
+    .then(response => {
+      const { data } = response.data;
+      loginRecords.value = data.slice(0, RECORDS_LEN);
+    })
+
 })
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .panel-card {
   width: 100%;
   height: 60vh;
@@ -101,12 +101,26 @@ onMounted(() => {
 
   margin-top: 50px;
 
-  .card {
+  ::v-deep .ant-space-item,
+  ::v-deep .ant-space {
     width: 100%;
-
-    &>div {
-      width: 100%;
-    }
+    max-height: 300px;
+    height: 100%;
   }
+}
+
+.directories {
+  
+  li {
+    &:hover {
+      cursor: pointer;
+      background-color: #f1f1f1;
+    }
+
+    padding: 10px 0 10px 10px;
+    border-radius: 10px;
+  }
+
+  
 }
 </style>

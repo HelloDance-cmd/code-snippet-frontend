@@ -7,7 +7,7 @@ import 'ant-design-vue/dist/reset.css';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 
-import router from './route';
+import router from './router';
 
 
 createApp(App)
