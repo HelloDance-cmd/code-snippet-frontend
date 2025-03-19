@@ -45,7 +45,7 @@ import { fetchCategoriesOfSnippet, fetchCreateSnippet, fetchFolderStructureInDas
 import { MenuClickEventHandler } from 'ant-design-vue/es/menu/src/interface';
 import { NoticeType } from 'ant-design-vue/es/message';
 import { DefaultOptionType } from 'ant-design-vue/es/select';
-import { fetchSnippetDelete } from '../utils/snippetRequest';
+import { fetchSnippetDelete } from '../utils/useSnippetRequest';
 
 
 const EMTPY_VALUE = 'Nothing';

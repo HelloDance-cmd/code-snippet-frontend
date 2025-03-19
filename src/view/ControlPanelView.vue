@@ -49,7 +49,7 @@ import { UserOutlined } from '@ant-design/icons-vue';
 import { Avatar, Card, List, ListItem, Space } from 'ant-design-vue';
 import { onMounted, ref } from "vue";
 import { type LoginRecoredType, type WhoAmIResponse, fetchLoginRecord, fetchWhoAmI } from '../utils/userReqeust';
-import { fetchSnippetDirectories, TDirectory } from '../utils/snippetRequest';
+import { fetchSnippetDirectories, TDirectory } from '../utils/useSnippetRequest';
 
 
 const userInfo = ref<WhoAmIResponse>();

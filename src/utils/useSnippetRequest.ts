@@ -1,5 +1,5 @@
 
-import request, { type Response } from "./axiosRequest";
+import request, { type Response } from "./useAxiosRequest";
 
 
 export type TDirectory = {
